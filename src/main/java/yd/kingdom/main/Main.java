@@ -45,6 +45,7 @@ public class Main extends JavaPlugin {
         getCommand("골키퍼").setExecutor(new GoalkeeperCommand());
         getCommand("수비수").setExecutor(new DefenderCommand());
         getCommand("공격수").setExecutor(new AttackerCommand());
+        getCommand("라운드2시작").setExecutor(new RoundTwoStartCommand());
         getCommand("라운드2종료").setExecutor(new RoundTwoEndCommand());
 
         getServer().getPluginManager().registerEvents(new ItemListener(), this);
@@ -52,6 +53,7 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BallKickListener(), this);
         getServer().getPluginManager().registerEvents(new PositionListener(), this);
         getServer().getPluginManager().registerEvents(new TeamDefendListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakDropListener(), this);
 
         getLogger().info("Minigame 플러그인 활성화됨");
     }

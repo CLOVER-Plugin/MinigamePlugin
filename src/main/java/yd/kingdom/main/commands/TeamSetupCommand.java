@@ -12,8 +12,8 @@ public class TeamSetupCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length < 2) {
-            MessageUtil.send(sender, "/팀 설정 <A|B> : A|B 팀 플레이어 설정");
-            MessageUtil.send(sender, "/팀 끈 <A|B> : 설정된 A|B 팀 플레이어들끼리 끈 연결/해제");
+            MessageUtil.send(sender, "/팀 설정 <A | B> : A|B 팀 플레이어 설정");
+            MessageUtil.send(sender, "/팀 끈 <A | B> : 설정된 A|B 팀 플레이어들끼리 끈 연결/해제");
             return false;
         }
 

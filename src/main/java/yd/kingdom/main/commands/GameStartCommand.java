@@ -17,6 +17,10 @@ public class GameStartCommand implements CommandExecutor {
         gm.startNextRound();
         MessageUtil.send(sender, "게임을 시작합니다. 현재 라운드: " + gm.getCurrentRound());
 
+        // 라운드가 2가 되면 TP만 수행 (호박 로직은 /라운드2시작에서 따로 시작)
+        if (gm.getCurrentRound() == 2) {
+            r2.teleportAllToArena();
+        }
         return true;
     }
 }

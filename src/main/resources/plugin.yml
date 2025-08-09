@@ -5,16 +5,12 @@ api-version: '1.21'
 commands:
   아이템:
     description: 공격팀 방해 아이템을 지급합니다.
-    usage: /아이템 <초기화권|깽판권|점프부스트|좀비소환권|감옥권>
   팀:
     description: 팀 설정 관련 커맨드입니다.
-    usage: /팀 <설정|끈> [A|B]
   그림:
     description: A팀 또는 B팀을 그림으로 지정합니다.
-    usage: /그림 <A|B>
   방해:
     description: A팀 또는 B팀을 방해로 지정합니다.
-    usage: /방해 <A|B>
   골키퍼:
     description: 골키퍼 포지션 설정
   수비수:
@@ -23,12 +19,13 @@ commands:
     description: 공격수 포지션 설정
   축구공:
     description: 축구공 소환/해제
-    usage: /축구공 <소환|해제>
   포지션초기화:
     description: 골키퍼/수비수/공격수 포지션 초기화
   게임시작:
     description: 다음 라운드를 시작합니다.
   게임종료:
     description: 게임을 종료하고 초기화합니다.
+  라운드2시작:
+    description: 2라운드 호박 로직 시작
   라운드2종료:
     description: 2라운드 호박 로직 종료

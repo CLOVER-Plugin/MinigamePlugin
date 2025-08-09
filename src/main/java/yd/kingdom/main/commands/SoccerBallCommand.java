@@ -18,7 +18,7 @@ public class SoccerBallCommand implements CommandExecutor {
         }
         Player player = (Player) sender;
         if (args.length != 1) {
-            MessageUtil.send(player, "사용법: /축구공 <소환|해제>");
+            MessageUtil.send(player, "사용법: /축구공 <소환 | 해제>");
             return false;
         }
         switch (args[0].toLowerCase()) {
@@ -30,7 +30,7 @@ public class SoccerBallCommand implements CommandExecutor {
                 MessageUtil.send(player, "모든 축구공을 제거했습니다.");
                 break;
             default:
-                MessageUtil.send(player, "사용법: /축구공 <소환|해제>");
+                MessageUtil.send(player, "사용법: /축구공 <소환 | 해제>");
                 return false;
         }
         return true;

@@ -13,7 +13,7 @@ public class DefendCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length != 1) {
-            MessageUtil.send(sender, "사용법: /그림 <A|B>");
+            MessageUtil.send(sender, "사용법: /그림 <A | B>");
             return false;
         }
         String team = args[0].toUpperCase();

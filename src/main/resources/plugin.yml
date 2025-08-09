@@ -25,5 +25,7 @@ commands:
     description: 다음 라운드를 시작합니다.
   게임종료:
     description: 게임을 종료하고 초기화합니다.
+  라운드2시작:
+    description: 2라운드 호박 로직 시작
   라운드2종료:
     description: 2라운드 호박 로직 종료

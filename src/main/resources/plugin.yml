@@ -19,12 +19,6 @@ commands:
     description: 공격수 포지션 설정
   축구공:
     description: 축구공 소환/해제
-  포지션초기화:
-    description: 골키퍼/수비수/공격수 포지션 초기화
-  게임시작:
-    description: 다음 라운드를 시작합니다.
-  게임종료:
-    description: 게임을 종료하고 초기화합니다.
   라운드2시작:
     description: 2라운드 호박 로직 시작
   라운드2종료:

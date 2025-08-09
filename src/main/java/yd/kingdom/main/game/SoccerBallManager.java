@@ -30,9 +30,7 @@ import java.util.UUID;
 public class SoccerBallManager {
     private static SoccerBallManager instance;
     private final Set<Ball> balls = Collections.synchronizedSet(new LinkedHashSet<>());
-
-    // 체감 중력: 1틱당 Δv ≈ 0.03
-    private static final double GRAVITY = 0.03;
+    private static final double PITCH_Y = -60.7;
 
     private SoccerBallManager() {}
 
@@ -52,11 +50,7 @@ public class SoccerBallManager {
                     Location loc = b.entity.getLocation();
                     World world = loc.getWorld();
 
-                    // 1) 지면 높이 고정
-                    int bx = loc.getBlockX(), bz = loc.getBlockZ();
-                    int groundBlockY = world.getHighestBlockYAt(bx, bz);
-                    double groundY = groundBlockY + 0.4;
-                    loc.setY(groundY);
+                    loc.setY(PITCH_Y);
 
                     // 2) 다음 X/Z 좌표 계산
                     Vector vel = b.velocity;
@@ -64,29 +58,21 @@ public class SoccerBallManager {
                     double nextZ = loc.getZ() + vel.getZ();
 
                     // 3) 충돌 검사: 땅 바로 위(groundBlockY+1)에 벽이 있으면 그 방향 차단
+                    int floorBlockY = (int) Math.floor(PITCH_Y - 0.4); // 블록Y
+                    int bx = loc.getBlockX(), bz = loc.getBlockZ();
                     int nBX = (int) Math.floor(nextX);
                     int nBZ = (int) Math.floor(nextZ);
-                    boolean blockedX = world.getBlockAt(nBX, groundBlockY + 1, bz).getType().isSolid();
-                    boolean blockedZ = world.getBlockAt(bx, groundBlockY + 1, nBZ).getType().isSolid();
+
+                    boolean blockedX = !world.getBlockAt(nBX, floorBlockY + 1, bz).isPassable();
+                    boolean blockedZ = !world.getBlockAt(bx, floorBlockY + 1, nBZ).isPassable();
 
                     // 4) 막힌 방향 속도 0, 자유 방향만 이동
-                    if (blockedX) {
-                        vel.setX(0);
-                    } else {
-                        loc.setX(nextX);
-                    }
-                    if (blockedZ) {
-                        vel.setZ(0);
-                    } else {
-                        loc.setZ(nextZ);
-                    }
+                    if (blockedX) vel.setX(0); else loc.setX(nextX);
+                    if (blockedZ) vel.setZ(0); else loc.setZ(nextZ);
 
                     // 5) 마찰 적용
                     vel.multiply(0.85);
-                    if (vel.lengthSquared() < 1e-4) {
-                        vel.setX(0);
-                        vel.setZ(0);
-                    }
+                    if (vel.lengthSquared() < 1e-4) { vel.setX(0); vel.setZ(0); }
 
                     // 6) 엔티티 위치 갱신
                     b.entity.teleport(loc);
@@ -138,15 +124,9 @@ public class SoccerBallManager {
         // 3) 해당 XZ에서 지면 높이 조사
         int bx = front.getBlockX();
         int bz = front.getBlockZ();
-        int by = world.getHighestBlockYAt(bx, bz);
 
-        // 4) 블럭 중앙 + 반블럭 위 (머리 높이 아님)
-        Location spawnLoc = new Location(
-                world,
-                bx + 0.5,
-                by + 0.5,
-                bz + 0.5
-        );
+        // 4) 블럭 중앙 + 반블럭 위
+        Location spawnLoc = new Location(world, bx + 0.5, PITCH_Y, bz + 0.5);
 
         // 5) ArmorStand 세팅
         ArmorStand as = (ArmorStand) world.spawnEntity(spawnLoc, EntityType.ARMOR_STAND);

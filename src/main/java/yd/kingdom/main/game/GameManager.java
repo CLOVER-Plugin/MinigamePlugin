@@ -22,7 +22,7 @@ public class GameManager {
         currentRound++;
         switch (currentRound) {
             case 1 -> roundOne.start();
-            case 2 -> roundTwo.start();
+            case 2 -> Bukkit.getLogger().info("라운드 2 진입 (/라운드2시작으로 실행)");
             case 3 -> roundThree.start();
             default -> Bukkit.getLogger().info("모든 라운드 완료");
         }

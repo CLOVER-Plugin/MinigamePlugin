@@ -4,14 +4,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -36,22 +39,50 @@ public class ItemListener implements Listener {
     private static final Map<UUID, ItemStack[]> savedInventories = new ConcurrentHashMap<>();
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        if (!teamManager.isAttackTeam(player)) return;
-        Material broken = event.getBlock().getType();
-        ItemStack reward = itemManager.getRandomAttackItem(broken);
-        if (reward != null) player.getInventory().addItem(reward);
-    }
-
-    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
         ItemStack item = event.getItem();
-        if (item == null || !item.hasItemMeta()) return;
+        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return;
+
         Player attacker = event.getPlayer();
         String name = item.getItemMeta().getDisplayName();
         switch (name) {
-            case "§a수비팀 그림판 초기화권":
+            case "§a그림팀 실명권":
+                if (!teamManager.isAttackTeam(attacker)) {
+                    MessageUtil.send(attacker, "§c방해팀만 사용할 수 있습니다.");
+                    event.setCancelled(true);
+                    return;
+                }
+                consumeItem(attacker, item);
+                final int seconds = 5;
+                final int amplifier = 1;
+                final int ticks = seconds * 20;
+
+                Set<Player> drawTeam = teamManager.getDefendTeam();
+                if (drawTeam == null || drawTeam.isEmpty()) {
+                    MessageUtil.send(attacker, "§c그림팀 인원이 없습니다.");
+                    event.setCancelled(true);
+                    return;
+                }
+
+                for (Player p : drawTeam) {
+                    p.addPotionEffect(new PotionEffect(
+                            PotionEffectType.BLINDNESS,
+                            ticks,
+                            amplifier,
+                            false,   // ambient
+                            true,    // particles
+                            true     // icon
+                    ));
+                    MessageUtil.send(p, "§8시야가 어두워졌습니다! §7(" + seconds + "초)");
+                }
+                MessageUtil.send(attacker, "§a그림팀 전체에게 §f실명 §a효과를 부여했습니다. §7(" + seconds + "초)");
+                event.setCancelled(true);
+                break;
+            case "§a그림팀 그림판 초기화권":
                 consumeItem(attacker, item);
                 LocationUtil.clearArea(
                         LocationUtil.getCanvasCorner1(),
@@ -59,10 +90,10 @@ public class ItemListener implements Listener {
                 );
                 MessageUtil.send(attacker, "그림판 영역이 초기화되었습니다.");
                 break;
-            case "§b수비팀 그림판 깽판권":
-                // 공격팀만 사용
+            case "§b그림팀 그림판 깽판권":
+                // 방해팀만 사용
                 if (!teamManager.isAttackTeam(attacker)) {
-                    MessageUtil.send(attacker, "§c공격팀만 사용할 수 있습니다.");
+                    MessageUtil.send(attacker, "§c방해팀만 사용할 수 있습니다.");
                     event.setCancelled(true);
                     return;
                 }
@@ -75,7 +106,7 @@ public class ItemListener implements Listener {
 
                 // 2) 워프
                 Location prev = attacker.getLocation();
-                attacker.teleport(LocationUtil.getCanvasLocation());
+                attacker.teleport(LocationUtil.getZombieSpawnLocation());
                 MessageUtil.send(attacker, "§a그림판으로 워프되었습니다! 10초 후 이전 위치로 복귀합니다.");
 
                 // 3) 10초 뒤 원위치 & 인벤 복원
@@ -89,7 +120,7 @@ public class ItemListener implements Listener {
                         }
                         MessageUtil.send(attacker, "§a이전 위치로 복귀되었습니다. 인벤토리가 복원되었습니다.");
                     }
-                }.runTaskLater(Bukkit.getPluginManager().getPlugin("OhapjiseolGame"), 20 * 10);
+                }.runTaskLater(Bukkit.getPluginManager().getPlugin("MinigamePlugin"), 20 * 10);
 
                 event.setCancelled(true);
                 break;
@@ -97,18 +128,25 @@ public class ItemListener implements Listener {
                 consumeItem(attacker, item);
                 for (Player dp : teamManager.getDefendTeam()) {
                     dp.addPotionEffect(
-                            new PotionEffect(PotionEffectType.JUMP_BOOST, 200, 100)
+                            new PotionEffect(PotionEffectType.JUMP_BOOST, 200, 20)
                     );
                 }
-                MessageUtil.send(attacker, "수비팀에게 점프 부스트를 적용했습니다.");
+                MessageUtil.send(attacker, "그림팀에게 점프 부스트를 적용했습니다.");
                 break;
             case "§d좀비 10마리 소환권":
                 consumeItem(attacker, item);
                 Location spawn = LocationUtil.getZombieSpawnLocation();
                 for (int i = 0; i < 10; i++) {
-                    spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
+                    Entity zombie = spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
+
+                    // 10초 후 제거
+                    Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+                        if (zombie.isValid()) {
+                            zombie.remove();
+                        }
+                    }, 20L * 10); // 10초
                 }
-                MessageUtil.send(attacker, "좀비 10마리를 소환했습니다.");
+                MessageUtil.send(attacker, "좀비 10마리를 소환했습니다. (10초 후 사라짐)");
                 break;
             case "§e랜덤 감옥권":
                 consumeItem(attacker, item);
@@ -133,28 +171,6 @@ public class ItemListener implements Listener {
                 return;
         }
         event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().contains("교환 NPC")) return;
-        event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
-        int slot = event.getRawSlot();
-        itemManager.exchangeItem(player, slot);
-    }
-
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Arrow arrow)) return;
-        if (!(arrow.getShooter() instanceof Player attacker)) return;
-        if (!teamManager.isAttackTeam(attacker)) return;
-        if (!(event.getEntity() instanceof Player victim)) return;
-        if (!teamManager.isDefendTeam(victim)) return;
-        victim.addPotionEffect(
-                new PotionEffect(PotionEffectType.BLINDNESS, 100, 1)
-        );
-        MessageUtil.send(attacker, victim.getName() + "님에게 실명 효과를 적용했습니다.");
     }
 
     private void consumeItem(Player p, ItemStack item) {

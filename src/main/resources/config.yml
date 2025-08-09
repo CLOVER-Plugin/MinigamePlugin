@@ -2,40 +2,40 @@
 canvas:
   corner1:
     world: world
-    x: 100.5
-    y: 64.0
-    z: -20.5
+    x: 45
+    y: -54
+    z: -107
   corner2:
     world: world
-    x: 120.5
-    y: 70.0
-    z: 0.5
+    x: 61
+    y: -58
+    z: -99
 
 # 좀비 소환 위치
 zombie_spawn:
-  world: world_nether
-  x: 200.0
-  y: 80.0
-  z: 200.0
+  world: world
+  x: 53
+  y: -58
+  z: -103
 
 # 감옥 입장/해제 위치
 jail:
   world: world
-  x: 50.0
-  y: 65.0
-  z: 50.0
+  x: 53
+  y: -59
+  z: -58
 release:
   world: world
-  x: 55.0
-  y: 65.0
-  z: 55.0
+  x: 53
+  y: -58
+  z: -92
 
 # 블럭상자
 unlimited-chests:
   - world: world
-    x: 58
-    y: -50
-    z: 50
+    x: 41
+    y: -59
+    z: -103
     slots:
       0:
         material: WHITE_CONCRETE

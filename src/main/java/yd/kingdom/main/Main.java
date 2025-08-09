@@ -37,21 +37,23 @@ public class Main extends JavaPlugin {
 
         getCommand("아이템").setExecutor(new ItemCommand());
         getCommand("팀").setExecutor(new TeamSetupCommand());
-        getCommand("수비").setExecutor(new DefendCommand());
-        getCommand("공격").setExecutor(new AttackCommand());
-        getCommand("게임시작").setExecutor(new GameStartCommand());
-        getCommand("게임종료").setExecutor(new GameEndCommand());
+        getCommand("그림").setExecutor(new DefendCommand());
+        getCommand("방해").setExecutor(new AttackCommand());
         getCommand("축구공").setExecutor(new SoccerBallCommand());
         getCommand("골키퍼").setExecutor(new GoalkeeperCommand());
         getCommand("수비수").setExecutor(new DefenderCommand());
         getCommand("공격수").setExecutor(new AttackerCommand());
+        getCommand("라운드2시작").setExecutor(new RoundTwoStartCommand());
         getCommand("라운드2종료").setExecutor(new RoundTwoEndCommand());
+        getCommand("spawn").setExecutor(new SpawnCommand());
 
         getServer().getPluginManager().registerEvents(new ItemListener(), this);
         getServer().getPluginManager().registerEvents(new TeamChatListener(), this);
         getServer().getPluginManager().registerEvents(new BallKickListener(), this);
         getServer().getPluginManager().registerEvents(new PositionListener(), this);
         getServer().getPluginManager().registerEvents(new TeamDefendListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakDropListener(), this);
+        getServer().getPluginManager().registerEvents(new HungerListener(), this);
 
         getLogger().info("Minigame 플러그인 활성화됨");
     }

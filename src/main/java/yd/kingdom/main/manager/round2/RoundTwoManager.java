@@ -2,6 +2,7 @@ package yd.kingdom.main.manager.round2;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,21 +30,22 @@ public class RoundTwoManager implements Listener {
     private final Set<Player> pumpkined = new HashSet<>();
     private BukkitTask pumpkinCycleTask;
     private final Team hideNameTeam;
+    private boolean active = false;
 
     public RoundTwoManager() {
         ScoreboardManager mgr = Bukkit.getScoreboardManager();
         Scoreboard board = mgr.getMainScoreboard();
         Team team = board.getTeam("pumpkin_hide");
-        if (team == null) {
-            team = board.registerNewTeam("pumpkin_hide");
-        }
+        if (team == null) team = board.registerNewTeam("pumpkin_hide");
         team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
         hideNameTeam = team;
     }
 
+    public void begin() {
+        if (active) return;
+        active = true;
 
-    public void start() {
-        Bukkit.getLogger().info("2라운드: 고깔축구 시작");
+        Bukkit.getLogger().info("2라운드: 고깔축구 호박 로직 시작");
 
         // 즉시 호박 씌우기
         applyPumpkinToAll();
@@ -53,14 +55,24 @@ public class RoundTwoManager implements Listener {
             @Override
             public void run() {
                 removePumpkinFromAll();
-                // 10초 뒤 다시
+                // 10초 뒤 다시 착용
                 new BukkitRunnable() {
                     @Override public void run() {
-                        applyPumpkinToAll();
+                        if (active) applyPumpkinToAll();
                     }
                 }.runTaskLater(plugin, 20 * 10);
             }
         }.runTaskTimer(plugin, 20 * 120, 20 * 120);
+    }
+
+    public void teleportAllToArena() {
+        Bukkit.getLogger().info("2라운드 진입: 전원 경기장 TP");
+        Location tpLocation = new Location(Bukkit.getWorld("world"), -94, -60, -149);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getGameMode() != GameMode.SPECTATOR) {
+                player.teleport(tpLocation);
+            }
+        }
     }
 
     public void stop() {
@@ -69,14 +81,13 @@ public class RoundTwoManager implements Listener {
             pumpkinCycleTask = null;
         }
         removePumpkinFromAll();
-
+        active = false;
     }
 
     private void applyPumpkinToAll() {
         pumpkined.clear();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if ((tm.isAttackTeam(p) || tm.isDefendTeam(p))
-                    && p.getGameMode() != GameMode.SPECTATOR) {
+            if ((tm.isAttackTeam(p) || tm.isDefendTeam(p)) && p.getGameMode() != GameMode.SPECTATOR) {
                 p.getInventory().setHelmet(new ItemStack(Material.CARVED_PUMPKIN));
                 p.updateInventory();
                 pumpkined.add(p);

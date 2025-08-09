@@ -21,7 +21,7 @@ public class ItemCommand implements CommandExecutor {
         }
         if (args.length < 1) {
             MessageUtil.send(player,
-                    "사용법: /아이템 <초기화권|깽판권|점프부스트|좀비소환권|감옥권>");
+                    "사용법: /아이템 <초기화권 | 깽판권 | 점프부스트 | 좀비소환권 | 감옥권 | 실명권>");
             return false;
         }
         String key = args[0].toLowerCase();

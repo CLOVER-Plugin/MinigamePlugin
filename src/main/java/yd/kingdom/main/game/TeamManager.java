@@ -43,10 +43,14 @@ public class TeamManager {
             return;
         }
         if (currentSetupTeam == 'A') {
+            teamB.remove(target);
             teamA.add(target);
+            TeamColorManager.getInstance().assign(target, 'A');
             MessageUtil.send(setupSender, target.getName() + "님을 A팀에 추가했습니다.");
         } else {
+            teamA.remove(target);
             teamB.add(target);
+            TeamColorManager.getInstance().assign(target, 'B');
             MessageUtil.send(setupSender, target.getName() + "님을 B팀에 추가했습니다.");
         }
     }

@@ -23,3 +23,5 @@ commands:
     description: 2라운드 호박 로직 시작
   라운드2종료:
     description: 2라운드 호박 로직 종료
+  spawn:
+    description: 모든 플레이어 스폰으로 이동

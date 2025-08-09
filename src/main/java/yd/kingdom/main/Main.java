@@ -45,6 +45,7 @@ public class Main extends JavaPlugin {
         getCommand("공격수").setExecutor(new AttackerCommand());
         getCommand("라운드2시작").setExecutor(new RoundTwoStartCommand());
         getCommand("라운드2종료").setExecutor(new RoundTwoEndCommand());
+        getCommand("spawn").setExecutor(new SpawnCommand());
 
         getServer().getPluginManager().registerEvents(new ItemListener(), this);
         getServer().getPluginManager().registerEvents(new TeamChatListener(), this);

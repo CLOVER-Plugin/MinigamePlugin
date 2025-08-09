@@ -51,7 +51,7 @@ public class ItemListener implements Listener {
         Player attacker = event.getPlayer();
         String name = item.getItemMeta().getDisplayName();
         switch (name) {
-            case "§a수비팀 그림판 초기화권":
+            case "§a그림팀 그림판 초기화권":
                 consumeItem(attacker, item);
                 LocationUtil.clearArea(
                         LocationUtil.getCanvasCorner1(),
@@ -59,10 +59,10 @@ public class ItemListener implements Listener {
                 );
                 MessageUtil.send(attacker, "그림판 영역이 초기화되었습니다.");
                 break;
-            case "§b수비팀 그림판 깽판권":
-                // 공격팀만 사용
+            case "§b그림팀 그림판 깽판권":
+                // 방해팀만 사용
                 if (!teamManager.isAttackTeam(attacker)) {
-                    MessageUtil.send(attacker, "§c공격팀만 사용할 수 있습니다.");
+                    MessageUtil.send(attacker, "§c방해팀만 사용할 수 있습니다.");
                     event.setCancelled(true);
                     return;
                 }
@@ -75,7 +75,7 @@ public class ItemListener implements Listener {
 
                 // 2) 워프
                 Location prev = attacker.getLocation();
-                attacker.teleport(LocationUtil.getCanvasLocation());
+                attacker.teleport(LocationUtil.getZombieSpawnLocation());
                 MessageUtil.send(attacker, "§a그림판으로 워프되었습니다! 10초 후 이전 위치로 복귀합니다.");
 
                 // 3) 10초 뒤 원위치 & 인벤 복원
@@ -89,7 +89,7 @@ public class ItemListener implements Listener {
                         }
                         MessageUtil.send(attacker, "§a이전 위치로 복귀되었습니다. 인벤토리가 복원되었습니다.");
                     }
-                }.runTaskLater(Bukkit.getPluginManager().getPlugin("OhapjiseolGame"), 20 * 10);
+                }.runTaskLater(Bukkit.getPluginManager().getPlugin("MinigamePlugin"), 20 * 10);
 
                 event.setCancelled(true);
                 break;
@@ -100,7 +100,7 @@ public class ItemListener implements Listener {
                             new PotionEffect(PotionEffectType.JUMP_BOOST, 200, 100)
                     );
                 }
-                MessageUtil.send(attacker, "수비팀에게 점프 부스트를 적용했습니다.");
+                MessageUtil.send(attacker, "그림팀에게 점프 부스트를 적용했습니다.");
                 break;
             case "§d좀비 10마리 소환권":
                 consumeItem(attacker, item);

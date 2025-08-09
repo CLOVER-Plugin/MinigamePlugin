@@ -21,8 +21,8 @@ public class ItemManager {
 
     private void registerItems() {
         // display name and key should correspond to ItemCommand keys
-        itemMap.put("초기화권", createNamedItem(Material.BARRIER, "§a수비팀 그림판 초기화권"));
-        itemMap.put("깽판권", createNamedItem(Material.SLIME_BALL, "§b수비팀 그림판 깽판권"));
+        itemMap.put("초기화권", createNamedItem(Material.BARRIER, "§a그림팀 그림판 초기화권"));
+        itemMap.put("깽판권", createNamedItem(Material.SLIME_BALL, "§b그림팀 그림판 깽판권"));
         itemMap.put("점프부스트", createNamedItem(Material.FEATHER, "§c점프력 100배"));
         itemMap.put("좀비소환권", createNamedItem(Material.ROTTEN_FLESH, "§d좀비 10마리 소환권"));
         itemMap.put("감옥권", createNamedItem(Material.LEGACY_IRON_FENCE, "§e랜덤 감옥권"));

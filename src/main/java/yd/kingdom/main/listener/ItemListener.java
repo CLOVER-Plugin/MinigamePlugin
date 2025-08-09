@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -136,9 +137,16 @@ public class ItemListener implements Listener {
                 consumeItem(attacker, item);
                 Location spawn = LocationUtil.getZombieSpawnLocation();
                 for (int i = 0; i < 10; i++) {
-                    spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
+                    Entity zombie = spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
+
+                    // 10초 후 제거
+                    Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+                        if (zombie.isValid()) {
+                            zombie.remove();
+                        }
+                    }, 20L * 10); // 10초
                 }
-                MessageUtil.send(attacker, "좀비 10마리를 소환했습니다.");
+                MessageUtil.send(attacker, "좀비 10마리를 소환했습니다. (10초 후 사라짐)");
                 break;
             case "§e랜덤 감옥권":
                 consumeItem(attacker, item);

@@ -30,7 +30,8 @@ import java.util.UUID;
 public class SoccerBallManager {
     private static SoccerBallManager instance;
     private final Set<Ball> balls = Collections.synchronizedSet(new LinkedHashSet<>());
-    private static final double PITCH_Y = -60.7;
+    private static final int FLOOR_BLOCK_Y = -61;   // 바닥 블록 Y(정수)
+    private static final double PITCH_Y = FLOOR_BLOCK_Y + 0.4; // 블록 윗면보다 살짝 위
 
     private SoccerBallManager() {}
 
@@ -58,13 +59,14 @@ public class SoccerBallManager {
                     double nextZ = loc.getZ() + vel.getZ();
 
                     // 3) 충돌 검사: 땅 바로 위(groundBlockY+1)에 벽이 있으면 그 방향 차단
-                    int floorBlockY = (int) Math.floor(PITCH_Y - 0.4); // 블록Y
+                    int checkY = FLOOR_BLOCK_Y + 1;
+
                     int bx = loc.getBlockX(), bz = loc.getBlockZ();
                     int nBX = (int) Math.floor(nextX);
                     int nBZ = (int) Math.floor(nextZ);
 
-                    boolean blockedX = !world.getBlockAt(nBX, floorBlockY + 1, bz).isPassable();
-                    boolean blockedZ = !world.getBlockAt(bx, floorBlockY + 1, nBZ).isPassable();
+                    boolean blockedX = !world.getBlockAt(nBX, checkY, bz).isPassable();
+                    boolean blockedZ = !world.getBlockAt(bx, checkY, nBZ).isPassable();
 
                     // 4) 막힌 방향 속도 0, 자유 방향만 이동
                     if (blockedX) vel.setX(0); else loc.setX(nextX);

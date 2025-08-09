@@ -53,6 +53,7 @@ public class Main extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PositionListener(), this);
         getServer().getPluginManager().registerEvents(new TeamDefendListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakDropListener(), this);
+        getServer().getPluginManager().registerEvents(new HungerListener(), this);
 
         getLogger().info("Minigame 플러그인 활성화됨");
     }

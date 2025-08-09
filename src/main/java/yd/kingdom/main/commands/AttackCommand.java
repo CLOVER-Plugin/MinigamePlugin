@@ -38,7 +38,8 @@ public class AttackCommand implements CommandExecutor {
                 Material.DIAMOND_PICKAXE,
                 Material.DIAMOND_AXE,
                 Material.DIAMOND_SHOVEL,
-                Material.SHEARS
+                Material.SHEARS,
+                Material.BOW
         };
         for (Material tool : tools) {
             ItemStack item = new ItemStack(tool);

@@ -57,27 +57,29 @@ public class BlockBreakDropListener implements Listener {
         ItemStack reward = null;
         String rewardName = null;
 
-        if (roll <= 20) {
+        if (roll <= 10) {
             reward = new ItemStack(Material.ARROW, 1);
             rewardName = "§7화살";
-        } else if (roll <= 45) {
+        } else if (roll <= 15) {
             reward = itemManager.getItemByKey("실명권").clone();
             rewardName = "§a그림팀 실명권";
-        } else if (roll == 46) {
+        } else if (roll == 16) {
             reward = itemManager.getItemByKey("초기화권").clone();
             rewardName = "§a그림판 초기화권";
-        } else if (roll <= 56) {
+        } else if (roll <= 21) {
             reward = itemManager.getItemByKey("깽판권").clone();
             rewardName = "§b그림판 깽판권";
-        } else if (roll <= 86) {
+        } else if (roll <= 31) {
             reward = itemManager.getItemByKey("점프부스트").clone();
             rewardName = "§c점프력 100배";
-        } else if (roll <= 96) {
+        } else if (roll <= 36) {
             reward = itemManager.getItemByKey("좀비소환권").clone();
             rewardName = "§d좀비 10마리 소환권";
-        } else { // 97~100
+        } else if (roll == 37) {
             reward = itemManager.getItemByKey("감옥권").clone();
             rewardName = "§e랜덤 감옥권";
+        } else {
+            return;
         }
 
         if (reward != null) {
@@ -96,6 +98,6 @@ public class BlockBreakDropListener implements Listener {
         Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
             block.setType(originalType, false);
             block.setBlockData(originalData, false);
-        }, 2L);
+        }, 20L*60);
     }
 }

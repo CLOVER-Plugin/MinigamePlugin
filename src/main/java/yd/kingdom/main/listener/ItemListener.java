@@ -36,21 +36,44 @@ public class ItemListener implements Listener {
     private static final Map<UUID, ItemStack[]> savedInventories = new ConcurrentHashMap<>();
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        if (!teamManager.isAttackTeam(player)) return;
-        Material broken = event.getBlock().getType();
-        ItemStack reward = itemManager.getRandomAttackItem(broken);
-        if (reward != null) player.getInventory().addItem(reward);
-    }
-
-    @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item == null || !item.hasItemMeta()) return;
         Player attacker = event.getPlayer();
         String name = item.getItemMeta().getDisplayName();
         switch (name) {
+            case "§a그림팀 실명권":
+                if (!teamManager.isAttackTeam(attacker)) {
+                    MessageUtil.send(attacker, "§c방해팀만 사용할 수 있습니다.");
+                    event.setCancelled(true);
+                    return;
+                }
+                consumeItem(attacker, item);
+                final int seconds = 5;
+                final int amplifier = 1;
+                final int ticks = seconds * 20;
+
+                Set<Player> drawTeam = teamManager.getDefendTeam();
+                if (drawTeam == null || drawTeam.isEmpty()) {
+                    MessageUtil.send(attacker, "§c그림팀 인원이 없습니다.");
+                    event.setCancelled(true);
+                    return;
+                }
+
+                for (Player p : drawTeam) {
+                    p.addPotionEffect(new PotionEffect(
+                            PotionEffectType.BLINDNESS,
+                            ticks,
+                            amplifier,
+                            false,   // ambient
+                            true,    // particles
+                            true     // icon
+                    ));
+                    MessageUtil.send(p, "§8시야가 어두워졌습니다! §7(" + seconds + "초)");
+                }
+                MessageUtil.send(attacker, "§a그림팀 전체에게 §f실명 §a효과를 부여했습니다. §7(" + seconds + "초)");
+                event.setCancelled(true);
+                break;
             case "§a그림팀 그림판 초기화권":
                 consumeItem(attacker, item);
                 LocationUtil.clearArea(
@@ -97,7 +120,7 @@ public class ItemListener implements Listener {
                 consumeItem(attacker, item);
                 for (Player dp : teamManager.getDefendTeam()) {
                     dp.addPotionEffect(
-                            new PotionEffect(PotionEffectType.JUMP_BOOST, 200, 100)
+                            new PotionEffect(PotionEffectType.JUMP_BOOST, 200, 20)
                     );
                 }
                 MessageUtil.send(attacker, "그림팀에게 점프 부스트를 적용했습니다.");
@@ -133,28 +156,6 @@ public class ItemListener implements Listener {
                 return;
         }
         event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getView().getTitle().contains("교환 NPC")) return;
-        event.setCancelled(true);
-        Player player = (Player) event.getWhoClicked();
-        int slot = event.getRawSlot();
-        itemManager.exchangeItem(player, slot);
-    }
-
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Arrow arrow)) return;
-        if (!(arrow.getShooter() instanceof Player attacker)) return;
-        if (!teamManager.isAttackTeam(attacker)) return;
-        if (!(event.getEntity() instanceof Player victim)) return;
-        if (!teamManager.isDefendTeam(victim)) return;
-        victim.addPotionEffect(
-                new PotionEffect(PotionEffectType.BLINDNESS, 100, 1)
-        );
-        MessageUtil.send(attacker, victim.getName() + "님에게 실명 효과를 적용했습니다.");
     }
 
     private void consumeItem(Player p, ItemStack item) {

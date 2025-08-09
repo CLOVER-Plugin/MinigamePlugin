@@ -20,7 +20,7 @@ public class ItemManager {
     }
 
     private void registerItems() {
-        // display name and key should correspond to ItemCommand keys
+        itemMap.put("실명권", createNamedItem(Material.ENDER_EYE, "§a그림팀 실명권"));
         itemMap.put("초기화권", createNamedItem(Material.BARRIER, "§a그림팀 그림판 초기화권"));
         itemMap.put("깽판권", createNamedItem(Material.SLIME_BALL, "§b그림팀 그림판 깽판권"));
         itemMap.put("점프부스트", createNamedItem(Material.FEATHER, "§c점프력 100배"));
@@ -38,17 +38,5 @@ public class ItemManager {
 
     public ItemStack getItemByKey(String key) {
         return itemMap.get(key);
-    }
-
-    public ItemStack getRandomAttackItem(Material broken) {
-        // Simple random: choose any registered item
-        Object[] keys = itemMap.values().toArray();
-        return (ItemStack) keys[random.nextInt(keys.length)];
-    }
-
-    public void exchangeItem(org.bukkit.entity.Player player, int slot) {
-        // Implement NPC exchange logic based on slot index
-        // Placeholder: give a pass
-        player.sendMessage("아이템 교환 기능은 아직 구현되지 않았습니다.");
     }
 }

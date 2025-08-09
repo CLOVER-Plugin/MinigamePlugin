@@ -37,8 +37,8 @@ public class Main extends JavaPlugin {
 
         getCommand("아이템").setExecutor(new ItemCommand());
         getCommand("팀").setExecutor(new TeamSetupCommand());
-        getCommand("수비").setExecutor(new DefendCommand());
-        getCommand("공격").setExecutor(new AttackCommand());
+        getCommand("그림").setExecutor(new DefendCommand());
+        getCommand("방해").setExecutor(new AttackCommand());
         getCommand("게임시작").setExecutor(new GameStartCommand());
         getCommand("게임종료").setExecutor(new GameEndCommand());
         getCommand("축구공").setExecutor(new SoccerBallCommand());

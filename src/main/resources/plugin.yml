@@ -9,12 +9,12 @@ commands:
   팀:
     description: 팀 설정 관련 커맨드입니다.
     usage: /팀 <설정|끈> [A|B]
-  수비:
-    description: A팀 또는 B팀을 수비로 지정합니다.
-    usage: /수비 <A|B>
-  공격:
-    description: A팀 또는 B팀을 공격으로 지정합니다.
-    usage: /공격 <A|B>
+  그림:
+    description: A팀 또는 B팀을 그림으로 지정합니다.
+    usage: /그림 <A|B>
+  방해:
+    description: A팀 또는 B팀을 방해로 지정합니다.
+    usage: /방해 <A|B>
   골키퍼:
     description: 골키퍼 포지션 설정
   수비수:

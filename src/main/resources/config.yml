@@ -33,7 +33,7 @@ release:
 # 블럭상자
 unlimited-chests:
   - world: world
-    x: 65
+    x: 41
     y: -59
     z: -103
     slots:

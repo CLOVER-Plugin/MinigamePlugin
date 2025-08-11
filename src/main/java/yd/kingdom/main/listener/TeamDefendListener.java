@@ -21,7 +21,7 @@ public class TeamDefendListener implements Listener {
                 for (Player p : tm.getDefendTeam()) {
                     p.addPotionEffect(new PotionEffect(
                             PotionEffectType.REGENERATION,
-                            40,2,true,false
+                            40,249,true,false
                     ));
                 }
             }

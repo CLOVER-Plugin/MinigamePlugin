@@ -65,9 +65,6 @@ public class LocationUtil {
     public static Location getCanvasCorner1() { return corner1; }
     public static Location getCanvasCorner2() { return corner2; }
 
-    public static void setCanvasLocation(Location loc) { canvas = loc; }
-    public static Location getCanvasLocation() { return canvas; }
-
     public static void setZombieSpawnLocation(Location loc) { zombieSpawn = loc; }
     public static Location getZombieSpawnLocation() { return zombieSpawn; }
 

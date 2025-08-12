@@ -51,35 +51,40 @@ public class BlockBreakDropListener implements Listener {
 
         try { e.setDropItems(false); } catch (NoSuchMethodError ignore) {}
 
-        // 1~100 주사위
-        int roll = ThreadLocalRandom.current().nextInt(1, 101);
-
         ItemStack reward = null;
         String rewardName = null;
 
-        if (roll <= 10) {
+        double roll = ThreadLocalRandom.current().nextDouble(100.0); // 0.0 ≤ roll < 100.0
+
+        if (roll < 0.3) { // 화살 0.3%
             reward = new ItemStack(Material.ARROW, 1);
             rewardName = "§7화살";
-        } else if (roll <= 15) {
-            reward = itemManager.getItemByKey("실명권").clone();
-            rewardName = "§a그림팀 실명권";
-        } else if (roll == 16) {
+
+        } else if (roll < 0.5) { // 초기화 0.2% (누적 0.5)
             reward = itemManager.getItemByKey("초기화권").clone();
             rewardName = "§a그림판 초기화권";
-        } else if (roll <= 21) {
+
+        } else if (roll < 0.7) { // 깽판 0.2% (누적 0.7)
             reward = itemManager.getItemByKey("깽판권").clone();
             rewardName = "§b그림판 깽판권";
-        } else if (roll <= 31) {
+
+        } else if (roll < 0.9) { // 실명 0.2% (누적 0.9)
+            reward = itemManager.getItemByKey("실명권").clone();
+            rewardName = "§a그림팀 실명권";
+
+        } else if (roll < 1.1) { // 점프 0.2% (누적 1.1)
             reward = itemManager.getItemByKey("점프부스트").clone();
             rewardName = "§c점프력 100배";
-        } else if (roll <= 36) {
+
+        } else if (roll < 1.3) { // 좀비 0.2% (누적 1.3)
             reward = itemManager.getItemByKey("좀비소환권").clone();
             rewardName = "§d좀비 10마리 소환권";
-        } else if (roll == 37) {
+
+        } else if (roll < 1.5) { // 감옥 0.2% (누적 1.5)
             reward = itemManager.getItemByKey("감옥권").clone();
             rewardName = "§e랜덤 감옥권";
+
         } else {
-            return;
         }
 
         if (reward != null) {

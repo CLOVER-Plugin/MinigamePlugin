@@ -8,10 +8,9 @@ import yd.kingdom.main.manager.round2.RoundTwoManager;
 import yd.kingdom.main.util.MessageUtil;
 
 public class RoundTwoEndCommand implements CommandExecutor {
-    private final RoundTwoManager r2 = Main.getInstance().getRoundTwoManager();
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        RoundTwoManager r2 = Main.getInstance().getRoundTwoManager();
         r2.stop();
         MessageUtil.send(sender, "2라운드 종료");
         return true;

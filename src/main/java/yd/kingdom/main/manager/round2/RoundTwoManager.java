@@ -4,17 +4,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
@@ -35,6 +42,10 @@ public class RoundTwoManager implements Listener {
     private BukkitTask pumpkinCycleTask;
     private final Team hideNameTeam;
     private boolean active = false;
+    private BossBar roundBossBar;
+    private BukkitTask roundCountdownTask;
+    private static final int ROUND_TOTAL_SECONDS = 15 * 60;
+    private int roundRemainingSeconds = 0;
 
     public RoundTwoManager() {
         ScoreboardManager mgr = Bukkit.getScoreboardManager();
@@ -67,16 +78,7 @@ public class RoundTwoManager implements Listener {
                 }.runTaskLater(plugin, 20 * 10);
             }
         }.runTaskTimer(plugin, 20 * 120, 20 * 120);
-    }
-
-    public void teleportAllToArena() {
-        Bukkit.getLogger().info("2라운드 진입: 전원 경기장 TP");
-        Location tpLocation = new Location(Bukkit.getWorld("world"), -94, -60, -149);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getGameMode() != GameMode.SPECTATOR) {
-                player.teleport(tpLocation);
-            }
-        }
+        startRoundBossbarCountdown();
     }
 
     public void stop() {
@@ -86,6 +88,7 @@ public class RoundTwoManager implements Listener {
         }
         removePumpkinFromAll();
         active = false;
+        stopRoundBossbarCountdown();
     }
 
     private void applyPumpkinToAll() {
@@ -100,6 +103,92 @@ public class RoundTwoManager implements Listener {
         }
     }
 
+    private void startRoundBossbarCountdown() {
+        // 이미 돌고 있으면 무시
+        if (roundBossBar != null || roundCountdownTask != null) return;
+
+        roundRemainingSeconds = ROUND_TOTAL_SECONDS;
+        roundBossBar = Bukkit.createBossBar(
+                titleFor(roundRemainingSeconds),
+                BarColor.GREEN,
+                BarStyle.SOLID
+        );
+        roundBossBar.setProgress(1.0);
+
+        // 현재 참여자들에게 보스바 노출
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (tm.isAttackTeam(p) || tm.isDefendTeam(p)) {
+                roundBossBar.addPlayer(p);
+            }
+        }
+
+        roundCountdownTask = new BukkitRunnable() {
+            @Override public void run() {
+                if (!active || roundBossBar == null) {
+                    this.cancel();
+                    return;
+                }
+
+                // 표시 갱신
+                roundBossBar.setTitle(titleFor(roundRemainingSeconds));
+                double progress = Math.max(0.0, Math.min(1.0,
+                        roundRemainingSeconds / (double) ROUND_TOTAL_SECONDS));
+                roundBossBar.setProgress(progress);
+
+                // 색상은 선택(가시성)
+                if (progress > 0.5) {
+                    roundBossBar.setColor(BarColor.GREEN);
+                } else if (progress > 0.2) {
+                    roundBossBar.setColor(BarColor.YELLOW);
+                } else {
+                    roundBossBar.setColor(BarColor.RED);
+                }
+
+                // 종료 처리
+                if (roundRemainingSeconds <= 0) {
+                    stopRoundBossbarCountdown(); // 보스바 삭제
+                    this.cancel();
+                    return;
+                }
+
+                roundRemainingSeconds--;
+            }
+        }.runTaskTimer(plugin, 0L, 20L); // 1초마다
+    }
+
+    private void stopRoundBossbarCountdown() {
+        if (roundCountdownTask != null) {
+            roundCountdownTask.cancel();
+            roundCountdownTask = null;
+        }
+        if (roundBossBar != null) {
+            roundBossBar.removeAll();
+            roundBossBar.setVisible(false);
+            roundBossBar = null;
+        }
+    }
+
+    private String titleFor(int seconds) {
+        int m = Math.max(0, seconds) / 60;
+        int s = Math.max(0, seconds) % 60;
+        return "라운드 종료까지 " + String.format("%02d:%02d", m, s);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        Player p = e.getPlayer();
+        if (active && roundBossBar != null && (tm.isAttackTeam(p) || tm.isDefendTeam(p))) {
+            roundBossBar.addPlayer(p);
+        }
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        if (roundBossBar != null) {
+            roundBossBar.removePlayer(e.getPlayer());
+        }
+    }
+
     private void removePumpkinFromAll() {
         for (Player p : new HashSet<>(pumpkined)) {
             p.getInventory().setHelmet(null);
@@ -110,14 +199,27 @@ public class RoundTwoManager implements Listener {
     }
 
     // 라운드2엔 서로 타격 금지
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST) // 가장 늦게 개입해 확실히 취소
     public void onPvP(EntityDamageByEntityEvent e) {
-        if (!(e.getDamager() instanceof Player d) || !(e.getEntity()   instanceof Player v)) return;
-        if (Main.getInstance().getGameManager().getCurrentRound() == 2
-                && ((tm.isAttackTeam(d)||tm.isDefendTeam(d))
-                && (tm.isAttackTeam(v)||tm.isDefendTeam(v)))) {
-            e.setCancelled(true);
+        if (!active) return; // 라운드2 아닐 때 패스
+        if (!(e.getEntity() instanceof Player victim)) return;
+
+        Player attacker = null;
+
+        // 근접/직접
+        if (e.getDamager() instanceof Player p) {
+            attacker = p;
         }
+        // 투사체(화살, 스노우볼 등)
+        else if (e.getDamager() instanceof Projectile proj) {
+            ProjectileSource src = proj.getShooter();
+            if (src instanceof Player shooter) attacker = shooter;
+        }
+
+        if (attacker == null) return;
+
+        // 라운드2 동안 '모든' PvP를 막고 싶다면:
+        e.setCancelled(true);
     }
 
     // 호박 제거 금지

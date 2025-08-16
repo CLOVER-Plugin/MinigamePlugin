@@ -8,10 +8,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -42,18 +44,18 @@ public class PositionListener implements Listener {
     // 포지션 아이템 우클릭
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
+        // 1) 우클릭 + 메인핸드만
+        Action action = e.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+        if (e.getHand() != EquipmentSlot.HAND) return;
+
         Player p = e.getPlayer();
         PositionType type = PositionManager.getInstance().get(p);
         if (type == null) return;
 
         ItemStack item = e.getItem();
-        if (item == null || !item.hasItemMeta()) return;
+        if (item == null || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return;
         String name = item.getItemMeta().getDisplayName();
-
-        if (!PositionManager.getInstance().tryUse(p)) {
-            e.setCancelled(true);
-            return;
-        }
         
         // 골키퍼 장갑 스킬
         if (type == PositionType.GOALKEEPER && name.equals("§6골키퍼 장갑")) {
@@ -61,9 +63,9 @@ public class PositionListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
+            e.setCancelled(true);
             buildWall(p);
             MessageUtil.send(p, "골키퍼 벽 생성!");
-            e.setCancelled(true);
             return;
         }
 
@@ -73,9 +75,9 @@ public class PositionListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
+            e.setCancelled(true);
             p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 1, true, false));
             MessageUtil.send(p, "신속 II 10초 부여!");
-            e.setCancelled(true);
             return;
         }
         

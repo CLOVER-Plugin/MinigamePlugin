@@ -133,10 +133,10 @@ public class ItemListener implements Listener {
                 }
                 MessageUtil.send(attacker, "그림팀에게 점프 부스트를 적용했습니다.");
                 break;
-            case "§d좀비 10마리 소환권":
+            case "§d좀비 2마리 소환권":
                 consumeItem(attacker, item);
                 Location spawn = LocationUtil.getZombieSpawnLocation();
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 2; i++) {
                     Entity zombie = spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
 
                     // 10초 후 제거
@@ -146,7 +146,7 @@ public class ItemListener implements Listener {
                         }
                     }, 20L * 10); // 10초
                 }
-                MessageUtil.send(attacker, "좀비 10마리를 소환했습니다. (10초 후 사라짐)");
+                MessageUtil.send(attacker, "좀비 2마리를 소환했습니다. (10초 후 사라짐)");
                 break;
             case "§e랜덤 감옥권":
                 consumeItem(attacker, item);
@@ -159,6 +159,7 @@ public class ItemListener implements Listener {
                 Location release = LocationUtil.getReleaseLocation();
                 target.teleport(jail);
                 MessageUtil.send(attacker, target.getName() + "님을 감옥에 보냈습니다.");
+                event.setCancelled(true);
                 new BukkitRunnable() {
                     @Override public void run() {
                         target.teleport(release);

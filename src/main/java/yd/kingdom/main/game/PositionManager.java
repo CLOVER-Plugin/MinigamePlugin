@@ -37,7 +37,7 @@ public class PositionManager {
         ItemStack item = null;
         switch (type) {
             case GOALKEEPER:
-                item = new ItemStack(Material.LEATHER_HELMET);
+                item = new ItemStack(Material.CLAY_BALL);
                 ItemMeta gm = item.getItemMeta();
                 gm.setDisplayName("§6골키퍼 장갑");
                 item.setItemMeta(gm);

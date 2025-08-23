@@ -78,7 +78,7 @@ public class RoundTwoManager implements Listener {
                 }.runTaskLater(plugin, 20 * 10);
             }
         }.runTaskTimer(plugin, 20 * 120, 20 * 120);
-        startRoundBossbarCountdown();
+        //startRoundBossbarCountdown();
     }
 
     public void stop() {
@@ -88,7 +88,7 @@ public class RoundTwoManager implements Listener {
         }
         removePumpkinFromAll();
         active = false;
-        stopRoundBossbarCountdown();
+        //stopRoundBossbarCountdown();
     }
 
     private void applyPumpkinToAll() {

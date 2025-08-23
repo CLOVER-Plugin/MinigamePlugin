@@ -78,7 +78,7 @@ public class BlockBreakDropListener implements Listener {
 
         } else if (roll < 1.3) { // 좀비 0.2% (누적 1.3)
             reward = itemManager.getItemByKey("좀비소환권").clone();
-            rewardName = "§d좀비 10마리 소환권";
+            rewardName = "§d좀비 2마리 소환권";
 
         } else if (roll < 1.5) { // 감옥 0.2% (누적 1.5)
             reward = itemManager.getItemByKey("감옥권").clone();

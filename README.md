@@ -337,7 +337,7 @@ src/main/java/yd/kingdom/main/
 - **문서 개선**: README나 문서 개선 제안도 환영합니다
 
 ### 개발자 정보
-- **개발자**: yd.kingdom
+- **개발자**: ydking0911
 - **프로젝트**: MinigamePlugin
 - **버전**: 1.0-SNAPSHOT
 - **지원 버전**: Minecraft 1.21.1+

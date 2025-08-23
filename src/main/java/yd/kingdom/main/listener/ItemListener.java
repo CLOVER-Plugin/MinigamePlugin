@@ -136,7 +136,7 @@ public class ItemListener implements Listener {
             case "§d좀비 2마리 소환권":
                 consumeItem(attacker, item);
                 Location spawn = LocationUtil.getZombieSpawnLocation();
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 2; i++) {
                     Entity zombie = spawn.getWorld().spawnEntity(spawn, EntityType.ZOMBIE);
 
                     // 10초 후 제거

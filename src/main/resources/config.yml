@@ -184,3 +184,33 @@ unlimited-chests:
       52:
         material: BLACK_TERRACOTTA
         amount: 64
+
+# 축구공 시스템
+soccer_ball:
+  spawn_location:
+    world: world
+    x: -72.5
+    y: -60
+    z: -110.5
+  goal1:
+    point1:
+      world: world
+      x: -43
+      y: -58
+      z: -116
+    point2:
+      world: world
+      x: -40
+      y: -60
+      z: -106
+  goal2:
+    point1:
+      world: world
+      x: -103
+      y: -58
+      z: -116
+    point2:
+      world: world
+      x: -106
+      y: -60
+      z: -106

@@ -10,6 +10,11 @@ public class LocationUtil {
     private static Location zombieSpawn;
     private static Location jail;
     private static Location release;
+    private static Location soccerBallSpawn;
+    private static Location goal1Point1;
+    private static Location goal1Point2;
+    private static Location goal2Point1;
+    private static Location goal2Point2;
 
     /**
      * config.yml에서 좌표를 읽어와 모든 위치 값을 초기화합니다.
@@ -56,6 +61,52 @@ public class LocationUtil {
         );
         setJailLocation(jl);
         setReleaseLocation(rl);
+
+        // 축구공 소환 위치
+        Location sbs = new Location(
+                plugin.getServer().getWorld(cfg.getString("soccer_ball.spawn_location.world")),
+                cfg.getDouble("soccer_ball.spawn_location.x"),
+                cfg.getDouble("soccer_ball.spawn_location.y"),
+                cfg.getDouble("soccer_ball.spawn_location.z")
+        );
+        
+        // 디버그: config.yml에서 읽어온 축구공 소환 좌표 출력
+        plugin.getLogger().info("[LocationUtil] Config에서 읽어온 축구공 소환 좌표: " + 
+            cfg.getDouble("soccer_ball.spawn_location.x") + ", " + 
+            cfg.getDouble("soccer_ball.spawn_location.y") + ", " + 
+            cfg.getDouble("soccer_ball.spawn_location.z"));
+        
+        setSoccerBallSpawnLocation(sbs);
+
+        // 골대1 두 지점
+        Location g1p1 = new Location(
+                plugin.getServer().getWorld(cfg.getString("soccer_ball.goal1.point1.world")),
+                cfg.getDouble("soccer_ball.goal1.point1.x"),
+                cfg.getDouble("soccer_ball.goal1.point1.y"),
+                cfg.getDouble("soccer_ball.goal1.point1.z")
+        );
+        Location g1p2 = new Location(
+                plugin.getServer().getWorld(cfg.getString("soccer_ball.goal1.point2.world")),
+                cfg.getDouble("soccer_ball.goal1.point2.x"),
+                cfg.getDouble("soccer_ball.goal1.point2.y"),
+                cfg.getDouble("soccer_ball.goal1.point2.z")
+        );
+        setGoal1Locations(g1p1, g1p2);
+
+        // 골대2 두 지점
+        Location g2p1 = new Location(
+                plugin.getServer().getWorld(cfg.getString("soccer_ball.goal2.point1.world")),
+                cfg.getDouble("soccer_ball.goal2.point1.x"),
+                cfg.getDouble("soccer_ball.goal2.point1.y"),
+                cfg.getDouble("soccer_ball.goal2.point1.z")
+        );
+        Location g2p2 = new Location(
+                plugin.getServer().getWorld(cfg.getString("soccer_ball.goal2.point2.world")),
+                cfg.getDouble("soccer_ball.goal2.point2.x"),
+                cfg.getDouble("soccer_ball.goal2.point2.y"),
+                cfg.getDouble("soccer_ball.goal2.point2.z")
+        );
+        setGoal2Locations(g2p1, g2p2);
     }
 
     public static void setCanvasCorners(Location c1, Location c2) {
@@ -73,6 +124,67 @@ public class LocationUtil {
 
     public static void setReleaseLocation(Location loc) { release = loc; }
     public static Location getReleaseLocation() { return release; }
+
+    public static void setSoccerBallSpawnLocation(Location loc) { soccerBallSpawn = loc; }
+    public static Location getSoccerBallSpawnLocation() { return soccerBallSpawn; }
+
+    public static void setGoal1Locations(Location point1, Location point2) { 
+        goal1Point1 = point1; 
+        goal1Point2 = point2; 
+    }
+    public static Location getGoal1Point1() { return goal1Point1; }
+    public static Location getGoal1Point2() { return goal1Point2; }
+
+    public static void setGoal2Locations(Location point1, Location point2) { 
+        goal2Point1 = point1; 
+        goal2Point2 = point2; 
+    }
+    public static Location getGoal2Point2() { return goal2Point2; }
+    public static Location getGoal2Point1() { return goal2Point1; }
+
+    /**
+     * 축구공이 골대에 들어갔는지 확인합니다.
+     * 두 지점 사이의 직사각형 영역 내에 있는지 검사합니다.
+     */
+    public static boolean isInGoal(Location ballLocation) {
+        // 골대1 검사
+        if (goal1Point1 != null && goal1Point2 != null) {
+            boolean inGoal1 = isInRectangle(ballLocation, goal1Point1, goal1Point2);
+            if (inGoal1) {
+                org.bukkit.Bukkit.getLogger().info("[LocationUtil] 골대1에 들어감! 공 위치: " + 
+                    ballLocation.getX() + ", " + ballLocation.getY() + ", " + ballLocation.getZ());
+                return true;
+            }
+        }
+        
+        // 골대2 검사
+        if (goal2Point1 != null && goal2Point2 != null) {
+            boolean inGoal2 = isInRectangle(ballLocation, goal2Point1, goal2Point2);
+            if (inGoal2) {
+                org.bukkit.Bukkit.getLogger().info("[LocationUtil] 골대2에 들어감! 공 위치: " + 
+                    ballLocation.getX() + ", " + ballLocation.getY() + ", " + ballLocation.getZ());
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 축구공이 두 지점으로 정의된 직사각형 영역 내에 있는지 확인합니다.
+     */
+    private static boolean isInRectangle(Location ballLocation, Location point1, Location point2) {
+        // Y 좌표는 고려하지 않음 (높이 제한 없음)
+        double minX = Math.min(point1.getX(), point2.getX());
+        double maxX = Math.max(point1.getX(), point2.getX());
+        double minZ = Math.min(point1.getZ(), point2.getZ());
+        double maxZ = Math.max(point1.getZ(), point2.getZ());
+        
+        double ballX = ballLocation.getX();
+        double ballZ = ballLocation.getZ();
+        
+        return ballX >= minX && ballX <= maxX && ballZ >= minZ && ballZ <= maxZ;
+    }
 
     public static void clearArea(Location c1, Location c2) {
         int x1 = Math.min(c1.getBlockX(), c2.getBlockX());

@@ -55,6 +55,33 @@ public class TeamManager {
         }
     }
 
+
+
+    public void playerTeam(Player target, String team) {
+        if (target == null || team == null || team.isEmpty()) {
+            if (setupSender != null) MessageUtil.send(setupSender, "대상 또는 팀이 유효하지 않습니다.");
+            return;
+        }
+
+        char t = Character.toUpperCase(team.charAt(0));
+
+        if (t == 'A') {
+            teamB.remove(target);
+            teamA.add(target);
+            TeamColorManager.getInstance().assign(target, 'A');
+            MessageUtil.send(target, "A팀으로 배정되었습니다.");
+            if (setupSender != null) MessageUtil.send(setupSender, target.getName() + "님을 A팀에 추가했습니다.");
+        } else if (t == 'B') {
+            teamA.remove(target);
+            teamB.add(target);
+            TeamColorManager.getInstance().assign(target, 'B');
+            MessageUtil.send(target, "B팀으로 배정되었습니다.");
+            if (setupSender != null) MessageUtil.send(setupSender, target.getName() + "님을 B팀에 추가했습니다.");
+        } else {
+            if (setupSender != null) MessageUtil.send(setupSender, "팀은 A 또는 B만 가능합니다.");
+        }
+    }
+
     public boolean isSetting() {
         return currentSetupTeam != 0;
     }

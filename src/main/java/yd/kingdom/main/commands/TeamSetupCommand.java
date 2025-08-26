@@ -22,6 +22,7 @@ public class TeamSetupCommand implements CommandExecutor {
 
         switch (sub) {
             case "설정": {
+                // /팀 설정 <A|B>
                 if (args.length < 2) {
                     MessageUtil.send(sender, "사용법: /팀 설정 <A|B>");
                     return true;
@@ -37,6 +38,7 @@ public class TeamSetupCommand implements CommandExecutor {
             }
 
             case "끈": {
+                // /팀 끈 <A|B>
                 if (args.length < 2) {
                     MessageUtil.send(sender, "사용법: /팀 끈 <A|B>");
                     return true;
@@ -56,6 +58,7 @@ public class TeamSetupCommand implements CommandExecutor {
             }
 
             case "강제": {
+                // /팀 강제 <A|B> <playername>
                 if (args.length < 3) {
                     MessageUtil.send(sender, "사용법: /팀 강제 <A|B> <플레이어이름>");
                     return true;
@@ -71,7 +74,6 @@ public class TeamSetupCommand implements CommandExecutor {
                     MessageUtil.send(sender, "해당 플레이어를 찾을 수 없습니다. (온라인 여부 확인)");
                     return true;
                 }
-
                 teamManager.playerTeam(target, team);
                 MessageUtil.send(sender, target.getName() + "님이 " + team + "팀으로 배정되었습니다.");
                 return true;

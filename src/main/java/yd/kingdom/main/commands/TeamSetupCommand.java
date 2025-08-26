@@ -1,96 +1,130 @@
-package yd.kingdom.main.commands;
+package yd.kingdom.main.game;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import yd.kingdom.main.game.TeamManager;
 import yd.kingdom.main.util.MessageUtil;
 
-public class TeamSetupCommand implements CommandExecutor {
-    private final TeamManager teamManager = TeamManager.getInstance();
+import java.util.*;
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 0) {
-            printHelp(sender);
-            return true;
+public class TeamManager {
+    private static final TeamManager instance = new TeamManager();
+    private final Set<Player> teamA = new HashSet<>();
+    private final Set<Player> teamB = new HashSet<>();
+    private final Set<Character> ropeEnabled = new HashSet<>();
+
+    private char attackSide = 0;
+    private char currentSetupTeam = 0;
+    private CommandSender setupSender;
+
+    private TeamManager() {}
+    public static TeamManager getInstance() { return instance; }
+
+    public void startSetup(String team, CommandSender sender) {
+        if (team == null || team.isEmpty()) return;
+        currentSetupTeam = team.charAt(0);
+        setupSender = sender;
+        MessageUtil.send(sender, currentSetupTeam + "팀 설정 모드에 들어갔습니다. 'end'를 입력하면 종료됩니다.");
+    }
+
+    public void handleChatInput(Player chattingPlayer, String message) {
+        if (currentSetupTeam == 0) return;
+        if (!(setupSender instanceof Player) || !((Player) setupSender).equals(chattingPlayer)) return;
+        String msg = message.trim();
+        if (msg.equalsIgnoreCase("end")) {
+            MessageUtil.send(setupSender, "팀 설정 모드가 종료되었습니다.");
+            currentSetupTeam = 0;
+            setupSender = null;
+            return;
         }
-
-        String sub = args[0];
-
-        switch (sub) {
-            case "설정": {
-                if (args.length < 2) {
-                    MessageUtil.send(sender, "사용법: /팀 설정 <A|B>");
-                    return true;
-                }
-                String team = args[1].toUpperCase();
-                if (!isValidTeam(team)) {
-                    MessageUtil.send(sender, "팀은 A 또는 B만 가능합니다.");
-                    return true;
-                }
-                MessageUtil.send(sender, team + "팀 설정 모드입니다. 플레이어를 채팅으로 입력하세요.");
-                teamManager.startSetup(team, sender);
-                return true;
-            }
-
-            case "끈": {
-                if (args.length < 2) {
-                    MessageUtil.send(sender, "사용법: /팀 끈 <A|B>");
-                    return true;
-                }
-                String team = args[1].toUpperCase();
-                if (!isValidTeam(team)) {
-                    MessageUtil.send(sender, "팀은 A 또는 B만 가능합니다.");
-                    return true;
-                }
-                boolean enabled = teamManager.toggleRope(team);
-                if (enabled) {
-                    MessageUtil.send(sender, team + "팀의 플레이어들이 줄로 연결되었습니다.");
-                } else {
-                    MessageUtil.send(sender, team + "팀의 줄 연결이 해제되었습니다.");
-                }
-                return true;
-            }
-
-            case "강제": {
-                if (args.length < 3) {
-                    MessageUtil.send(sender, "사용법: /팀 강제 <A|B> <플레이어이름>");
-                    return true;
-                }
-                String team = args[1].toUpperCase();
-                if (!isValidTeam(team)) {
-                    MessageUtil.send(sender, "팀은 A 또는 B만 가능합니다.");
-                    return true;
-                }
-                String targetName = args[2];
-                Player target = Bukkit.getPlayerExact(targetName);
-                if (target == null) {
-                    MessageUtil.send(sender, "해당 플레이어를 찾을 수 없습니다. (온라인 여부 확인)");
-                    return true;
-                }
-
-                teamManager.playerTeam(target, team);
-                MessageUtil.send(sender, target.getName() + "님이 " + team + "팀으로 배정되었습니다.");
-                return true;
-            }
-
-            default:
-                MessageUtil.send(sender, "알 수 없는 서브커맨드입니다.");
-                printHelp(sender);
-                return true;
+        Player target = chattingPlayer.getServer().getPlayerExact(msg);
+        if (target == null) {
+            MessageUtil.send(setupSender, "플레이어를 찾을 수 없습니다: " + msg);
+            return;
+        }
+        if (currentSetupTeam == 'A') {
+            teamB.remove(target);
+            teamA.add(target);
+            TeamColorManager.getInstance().assign(target, 'A');
+            MessageUtil.send(setupSender, target.getName() + "님을 A팀에 추가했습니다.");
+        } else {
+            teamA.remove(target);
+            teamB.add(target);
+            TeamColorManager.getInstance().assign(target, 'B');
+            MessageUtil.send(setupSender, target.getName() + "님을 B팀에 추가했습니다.");
         }
     }
 
-    private boolean isValidTeam(String team) {
-        return "A".equalsIgnoreCase(team) || "B".equalsIgnoreCase(team);
+
+
+    public void playerTeam(Player target, String team) {
+        if (target == null || team == null || team.isEmpty()) {
+            if (setupSender != null) MessageUtil.send(setupSender, "대상 또는 팀이 유효하지 않습니다.");
+            return;
+        }
+
+        char t = Character.toUpperCase(team.charAt(0));
+
+        if (t == 'A') {
+            teamB.remove(target);
+            teamA.add(target);
+            TeamColorManager.getInstance().assign(target, 'A');
+            MessageUtil.send(target, "A팀으로 배정되었습니다.");
+            if (setupSender != null) MessageUtil.send(setupSender, target.getName() + "님을 A팀에 추가했습니다.");
+        } else if (t == 'B') {
+            teamA.remove(target);
+            teamB.add(target);
+            TeamColorManager.getInstance().assign(target, 'B');
+            MessageUtil.send(target, "B팀으로 배정되었습니다.");
+            if (setupSender != null) MessageUtil.send(setupSender, target.getName() + "님을 B팀에 추가했습니다.");
+        } else {
+            if (setupSender != null) MessageUtil.send(setupSender, "팀은 A 또는 B만 가능합니다.");
+        }
     }
 
-    private void printHelp(CommandSender sender) {
-        MessageUtil.send(sender, "/팀 설정 <A | B> : A|B 팀 플레이어 설정");
-        MessageUtil.send(sender, "/팀 끈 <A | B> : 설정된 A|B 팀 플레이어들끼리 끈 연결/해제");
-        MessageUtil.send(sender, "/팀 강제 <A | B> <player> : 플레이어를 A|B 팀으로 강제 배정");
+    public boolean isSetting() {
+        return currentSetupTeam != 0;
+    }
+
+    public void setAttackTeam(String team) {
+        if (team == null || team.isEmpty()) return;
+        attackSide = team.charAt(0);
+    }
+
+    public void setDefendTeam(String team) {
+        if (team == null || team.isEmpty()) return;
+        attackSide = (team.charAt(0) == 'A') ? 'B' : 'A';
+    }
+
+    public boolean isAttackTeam(Player player) {
+        return attackSide == 'A' ? teamA.contains(player) : teamB.contains(player);
+    }
+
+    public boolean isDefendTeam(Player player) {
+        return attackSide == 'A' ? teamB.contains(player) : teamA.contains(player);
+    }
+
+    public Set<Player> getAttackTeam() { return attackSide == 'A' ? teamA : teamB; }
+    public Set<Player> getDefendTeam() { return attackSide == 'A' ? teamB : teamA; }
+
+    public boolean toggleRope(String team) {
+        if (team == null || team.isEmpty()) return false;
+        char t = team.charAt(0);
+        Set<Player> players = (t == 'A') ? teamA : teamB;
+        boolean enabled;
+        if (ropeEnabled.contains(t)) {
+            ropeEnabled.remove(t);
+            RopeManager.getInstance().stopRope();
+            enabled = false;
+        } else {
+            ropeEnabled.add(t);
+            RopeManager.getInstance().startRope(players);
+            enabled = true;
+        }
+        return enabled;
+    }
+
+    public boolean isRopeEnabled(char team) {
+        return ropeEnabled.contains((char)team);
     }
 }

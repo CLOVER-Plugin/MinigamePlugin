@@ -55,6 +55,31 @@ public class TeamManager {
         }
     }
 
+
+
+    public void playerTeam(Player chattingPlayer, String message) {
+        if (currentSetupTeam == 0) return;
+        if (!(setupSender instanceof Player) || !((Player) setupSender).equals(chattingPlayer)) return;
+        String msg = message.trim();
+        Player target = chattingPlayer.getServer().getPlayerExact(msg);
+        if (target == null) {
+            MessageUtil.send(setupSender, "플레이어를 찾을 수 없습니다: " + msg);
+            return;
+        }
+        if (msg == "A") {
+            teamB.remove(target);
+            teamA.add(target);
+            TeamColorManager.getInstance().assign(target, 'A');
+            MessageUtil.send(setupSender, target.getName() + "님을 A팀에 추가했습니다.");
+        } else {
+            teamA.remove(target);
+            teamB.add(target);
+            TeamColorManager.getInstance().assign(target, 'B');
+            MessageUtil.send(setupSender, target.getName() + "님을 B팀에 추가했습니다.");
+        }
+    }
+
+
     public boolean isSetting() {
         return currentSetupTeam != 0;
     }
